@@ -1,0 +1,12 @@
+{
+  "name": "03",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "client": "node client",
+    "server": "node server"
+  },
+  "author": "",
+  "license": "ISC"
+}
