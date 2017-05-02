@@ -4,6 +4,7 @@ const Data = require('../common/data');
 const Dtcp = require('../common/dtcp');
 const Dudp = require('../common/dudp');
 const Dip = require('../common/dip');
+const utils = require('../common/utils');
 
 const args = process.argv.slice(2);
 
@@ -12,12 +13,12 @@ if (args.length < 2) {
   return;
 }
 
-const l2Type = parseInt(args.shift());
+const l2Type = args.shift();
 const filename = args.shift();
 
-if (![1,2].includes(l2Type)) {
+if (!['dtcp','dudp'].includes(l2Type)) {
   console.log('usage: npm run client -- <type> <filename>');
-  console.log('<type> must be `1` or `2`');
+  console.log('<type> must be `dtcp` or `dudp`');
   return;
 }
 
@@ -31,22 +32,27 @@ fs.readFile(filename, (err, data)=> {
   const client = net.createConnection(6565, 'localhost');
 
   client.on('connect', ()=> {
+    console.log('--- layer 3 ---');
     const l3 = new Data(data);
-    console.log(l3);
-    const l2 = (()=> {
-      switch (l2Type) {
-        case 1: return new Dtcp(l3.serialize());
-        case 2: return new Dudp(l3.serialize());
-      }
-    })();
-    console.log(l2);
-    const l1 = new Dip(l2.serialize(), l2Type);
-    console.log(l1);
+    l3.preview();
+
+    console.log('--- layer 2 ---');
+    const l2 = buildLayer2(l3, l2Type);
+    l2.preview();
+
+    console.log('--- layer 1 ---');
+    const l1 = Dip.build(l2);
+    l1.preview();
+
     const serial = l1.serialize();
-    console.log(serial);
 
-    client.write(serial);
-
-    client.end();
+    client.end(serial);
   });
 });
+
+function buildLayer2(l3, type) {
+  switch (type) {
+    case 'dtcp': return Dtcp.build(l3);
+    case 'dudp': return Dudp.build(l3);
+  }
+}

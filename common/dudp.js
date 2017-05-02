@@ -1,3 +1,5 @@
+const Data = require('./data');
+
 module.exports = class Dudp {
   constructor(payload, len, type = 1) {
     this.payload = payload;
@@ -11,6 +13,19 @@ module.exports = class Dudp {
     dudp.writeUInt32BE(this.type, 0);
     dudp.writeUInt32BE(this.len, 4);
     return Buffer.concat([dudp, this.payload]);
+  }
+
+  extract() {
+    return Data.parse(this.payload);
+  }
+
+  preview() {
+    console.log(`type = ${this.type}`);
+    console.log(`len  = ${this.len}`);
+  }
+
+  static build(l3) {
+    return new Dudp(l3.serialize());
   }
 
   static parse(buffer) {

@@ -1,3 +1,10 @@
+const Dtcp = require('./dtcp');
+const Dudp = require('./dudp');
+
+const CHILD_TYPES = [];
+CHILD_TYPES[1] = Dtcp;
+CHILD_TYPES[2] = Dudp;
+
 module.exports = class Dip {
   constructor(payload, type, version = 1, ttl = 114514) {
     this.payload = payload;
@@ -13,6 +20,21 @@ module.exports = class Dip {
     dip.writeUInt32BE(this.version, 4);
     dip.writeUInt32BE(this.ttl, 8);
     return Buffer.concat([dip, this.payload]);
+  }
+
+  extract() {
+    return CHILD_TYPES[this.type].parse(this.payload);
+  }
+
+  preview() {
+    console.log(`type    = ${this.type}`);
+    console.log(`version = ${this.version}`);
+    console.log(`ttl     = ${this.ttl}`);
+  }
+
+  static build(l2) {
+    const type = CHILD_TYPES.indexOf(l2.constructor);
+    return new Dip(l2.serialize(), type);
   }
 
   static parse(buffer) {

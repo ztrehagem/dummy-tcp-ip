@@ -22,3 +22,18 @@ exports.bytesDigestToString = (buffer)=> {
   }
   return ret;
 };
+
+exports.bufferToInspectString = (buffer)=> {
+  const lines = [];
+  for (let i = 0; i < buffer.length; i += 16) {
+    const part = buffer.slice(i, i + 16);
+    const line = [...part].map(exports.byteToString).join(' ');
+    lines.push(line);
+  }
+  return lines.join('\n');
+};
+
+exports.byteToString = (num)=> {
+  let str = num.toString(16);
+  return (str.length == 1 ? '0' : '') + str;
+};
