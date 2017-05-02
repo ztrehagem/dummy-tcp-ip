@@ -4,7 +4,6 @@ const Data = require('../common/data');
 const Dtcp = require('../common/dtcp');
 const Dudp = require('../common/dudp');
 const Dip = require('../common/dip');
-const utils = require('../common/utils');
 
 const args = process.argv.slice(2);
 
@@ -41,12 +40,12 @@ fs.readFile(filename, (err, data)=> {
     l2.preview();
 
     console.log('--- layer 1 ---');
-    const l1 = Dip.build(l2);
+    const l1 = buildLayer1(l2);
     l1.preview();
 
     const serial = l1.serialize();
-
-    client.end(serial);
+    client.write(serial);
+    client.end();
   });
 });
 
@@ -55,4 +54,8 @@ function buildLayer2(l3, type) {
     case 'dtcp': return Dtcp.build(l3);
     case 'dudp': return Dudp.build(l3);
   }
+}
+
+function buildLayer1(l2) {
+  return Dip.build(l2);
 }

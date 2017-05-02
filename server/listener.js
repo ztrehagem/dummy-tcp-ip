@@ -7,10 +7,16 @@ const utils = require('../common/utils');
 module.exports = (c)=> {
   console.log('=== connected ===');
 
-  c.on('data', (data)=> {
+  const buf = [];
+
+  c.on('data', (data)=> buf.push(data));
+
+  c.on('end', ()=> {
+    const data = Buffer.concat(buf);
 
     try {
-      console.log('--- packet raw ---');
+
+      console.log('--- raw ---');
       console.log(utils.bufferToInspectString(data));
 
       console.log('--- layer 1 ---');
@@ -27,12 +33,13 @@ module.exports = (c)=> {
 
       console.log('--- content ---');
       console.log(l3.payload.toString());
-    } catch (e) {
-      console.error(e);
-    }
 
+    } catch (e) {
+
+      console.error(e);
+
+    }
   });
-  c.on('close', ()=> {
-    console.log('=== closed ===');
-  });
+
+  c.on('close', ()=> console.log('=== closed ==='));
 };
