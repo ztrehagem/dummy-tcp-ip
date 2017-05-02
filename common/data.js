@@ -16,4 +16,8 @@ module.exports = class Data {
   static parse(buffer) {
     return new Data(buffer);
   }
+
+  static get MAX_SIZE() {
+    return 1024;
+  }
 };

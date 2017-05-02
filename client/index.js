@@ -21,18 +21,35 @@ if (!['dtcp','dudp'].includes(l2Type)) {
   return;
 }
 
-// TODO openとreadで1024バイト毎に分割する
-fs.readFile(filename, (err, data)=> {
+fs.open(filename, 'r', (err, fd)=> {
   if (err) {
-    console.log(err.toString());
+    console.error(err.toString());
     return;
   }
+  read(fd);
+});
 
-  const client = net.createConnection(6565, 'localhost');
+function read(fd, position = 0) {
+  const buf = Buffer.alloc(Data.MAX_SIZE);
 
-  client.on('connect', ()=> {
+  fs.read(fd, buf, 0, buf.length, position, (err, bytesRead, buf)=> {
+    if (err) {
+      console.error(err.toString());
+      return;
+    }
+    if (bytesRead) {
+      send(buf.slice(0, bytesRead));
+    }
+    if (Data.MAX_SIZE <= bytesRead) {
+      read(fd, position + bytesRead);
+    }
+  });
+}
+
+function send(buf) {
+  const client = net.createConnection(6565, 'localhost', ()=> {
     console.log('--- layer 3 ---');
-    const l3 = new Data(data);
+    const l3 = new Data(buf);
     l3.preview();
 
     console.log('--- layer 2 ---');
@@ -47,7 +64,7 @@ fs.readFile(filename, (err, data)=> {
     client.write(serial);
     client.end();
   });
-});
+}
 
 function buildLayer2(l3, type) {
   switch (type) {

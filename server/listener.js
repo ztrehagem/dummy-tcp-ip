@@ -16,8 +16,8 @@ module.exports = (c)=> {
 
     try {
 
-      console.log('--- raw ---');
-      console.log(utils.bufferToInspectString(data));
+      // console.log('--- raw ---');
+      // console.log(utils.bufferToInspectString(data));
 
       console.log('--- layer 1 ---');
       const l1 = Dip.parse(data);
