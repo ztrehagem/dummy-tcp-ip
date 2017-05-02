@@ -8,7 +8,7 @@ module.exports = class Dtcp {
     this.type = type;
     this.digest = digest || (()=> {
       const str = utils.md5digest(payload.toString());
-      return utils.bytesDigest(str);
+      return utils.digestStringToBuffer(str);
     })();
   }
 
@@ -42,7 +42,7 @@ module.exports = class Dtcp {
     const payload = buffer.slice(24);
 
     const payloadDigestStr = utils.md5digest(payload.toString());
-    const digestStr = utils.bytesDigestToString(digest);
+    const digestStr = utils.bufferDigestToString(digest);
     if (payloadDigestStr != digestStr) {
       console.log(`             digest: ${digestStr}`);
       console.log(`digest from payload: ${payloadDigestStr}`);

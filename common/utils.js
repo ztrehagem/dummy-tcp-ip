@@ -6,7 +6,7 @@ exports.md5digest = (src, encode = 'utf8')=> {
   return md5.digest('hex');
 };
 
-exports.bytesDigest = (str)=> {
+exports.digestStringToBuffer = (str)=> {
   const result = Buffer.alloc(16);
   for (var i = 0; i < 16; i++) {
     result.writeUInt8(parseInt(str.substr(i * 2, 2), 16), i);
@@ -14,7 +14,7 @@ exports.bytesDigest = (str)=> {
   return result;
 };
 
-exports.bytesDigestToString = (buffer)=> {
+exports.bufferDigestToString = (buffer)=> {
   let ret = '';
   for (var i = 0; i < 16; i++) {
     const byte = buffer[i].toString(16);
