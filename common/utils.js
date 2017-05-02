@@ -37,3 +37,21 @@ exports.byteToString = (num)=> {
   let str = num.toString(16);
   return (str.length == 1 ? '0' : '') + str;
 };
+
+exports.promisify = (obj, propname)=> {
+  const origFn = obj[propname].bind(obj);
+  obj[`${propname}Prms`] = function() {
+    const outerArgs = arguments;
+
+    return new Promise(function(resolve, reject) {
+      const args = [...outerArgs, function(err, ...args) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(args.length == 1 ? args[0] : args);
+        }
+      }];
+      origFn(...args);
+    });
+  };
+};

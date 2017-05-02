@@ -4,6 +4,10 @@ const Data = require('../common/data');
 const Dtcp = require('../common/dtcp');
 const Dudp = require('../common/dudp');
 const Dip = require('../common/dip');
+const utils = require('../common/utils');
+
+utils.promisify(fs, 'open');
+utils.promisify(fs, 'read');
 
 const args = process.argv.slice(2);
 
@@ -21,27 +25,22 @@ if (!['dtcp','dudp'].includes(l2Type)) {
   return;
 }
 
-fs.open(filename, 'r', (err, fd)=> {
-  if (err) {
-    console.error(err.toString());
-    return;
-  }
-  read(fd);
-});
+fs.openPrms(filename, 'r')
+  .then(read)
+  .catch(handleError);
 
 function read(fd, position = 0) {
   const buf = Buffer.alloc(Data.MAX_SIZE);
 
-  fs.read(fd, buf, 0, buf.length, position, (err, bytesRead, buf)=> {
-    if (err) {
-      console.error(err.toString());
-      return;
-    }
+  return fs.readPrms(fd, buf, 0, buf.length, position).then((args)=> {
+    const bytesRead = args.shift();
+    const buf = args.shift();
+
     if (bytesRead) {
       send(buf.slice(0, bytesRead));
     }
     if (Data.MAX_SIZE <= bytesRead) {
-      read(fd, position + bytesRead);
+      return read(fd, position + bytesRead);
     }
   });
 }
@@ -75,4 +74,8 @@ function buildLayer2(l3, type) {
 
 function buildLayer1(l2) {
   return Dip.build(l2);
+}
+
+function handleError(err) {
+  console.error(err.toString());
 }
